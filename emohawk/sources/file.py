@@ -168,8 +168,14 @@ class FileSource(Source, os.PathLike, metaclass=FileSourceMeta):
     def to_bounding_box(self):
         return self._reader.to_bounding_box()
 
+    def to_x_grid(self):
+        return self._reader.to_x_grid()
+
+    def to_y_grid(self):
+        self._not_implemented()
+
     def statistics(self, **kwargs):
-        return self._reader.statistics(**kwargs)
+        return self._reader.to_y_grid()
 
 
 class File(FileSource):

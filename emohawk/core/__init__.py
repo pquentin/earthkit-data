@@ -84,6 +84,14 @@ class Base(metaclass=MetaBase):
     def to_bounding_box(self):
         self._not_implemented()
 
+    @abstractmethod
+    def to_x_grid(self):
+        self._not_implemented()
+
+    @abstractmethod
+    def to_y_grid(self):
+        self._not_implemented()
+
     # For machine learning
     @abstractmethod
     def statistics(self):

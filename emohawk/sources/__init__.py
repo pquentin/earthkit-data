@@ -153,3 +153,9 @@ def load_from_lazily(name, *args, **kwargs):
 
 def register(name, proc):
     register_plugin("source", name, proc)
+
+
+def transform(source, cls):
+    from emohawk import wrappers
+
+    return wrappers.get_translator(source, cls)

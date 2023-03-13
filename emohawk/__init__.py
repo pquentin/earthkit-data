@@ -18,13 +18,14 @@ except ImportError:  # pragma: no cover
 from .arguments.transformers import ALL
 from .core.caching import CACHE as cache
 from .core.settings import SETTINGS as settings
-from .sources import load_from, load_from_lazily
+from .sources import load_from, load_from_lazily, transform
 
 __all__ = [
     "ALL",
     "cache",
     "load_from",
     "load_from_lazily",
+    "transform",
     "settings",
     "__version__",
 ]

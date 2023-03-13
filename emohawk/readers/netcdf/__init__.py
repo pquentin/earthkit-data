@@ -20,7 +20,8 @@ from emohawk.core import Base
 from emohawk.utils.bbox import BoundingBox
 from emohawk.utils.dates import to_datetime
 
-from . import Reader
+from .. import Reader
+from .axes import GRID_AXES
 
 
 def as_datetime(self, time):
@@ -144,6 +145,7 @@ class NetCDFField(Base):
     def __init__(self, path, ds, variable, slices, non_dim_coords):
 
         data_array = ds[variable]
+        self.data_array = data_array
 
         self.north, self.west, self.south, self.east = ds.bbox(variable)
 
@@ -162,6 +164,8 @@ class NetCDFField(Base):
 
         self.time = non_dim_coords.get("valid_time", non_dim_coords.get("time"))
 
+        self._grid = None
+
         # print('====', non_dim_coords)
 
         for s in self.slices:
@@ -179,6 +183,33 @@ class NetCDFField(Base):
         return BoundingBox(
             north=self.north, south=self.south, east=self.east, west=self.west
         )
+
+    def _to_grid(self):
+        if self._grid is None:
+            axes = {}
+            for axis in ("x", "y"):
+                for coord in self.data_array.coords:
+                    if (
+                        self.data_array.coords[coord].attrs.get("axis", "").lower()
+                        == axis
+                    ):
+                        break
+                else:
+                    candidates = GRID_AXES.get(axis, [])
+                    for coord in candidates:
+                        if coord in self.data_array.coords:
+                            break
+                    else:
+                        raise ValueError(f"No coordinate found with axis '{axis}'")
+                axes[axis] = self.data_array.coords[coord]
+            self._grid = np.meshgrid(axes["x"], axes["y"])
+        return self._grid
+
+    def to_x_grid(self):
+        return self._to_grid()[0]
+
+    def to_y_grid(self):
+        return self._to_grid()[1]
 
 
 class NetCDFReader(Reader):
@@ -338,6 +369,16 @@ class NetCDFReader(Reader):
 
     def to_bounding_box(self):
         return BoundingBox.multi_merge([s.to_bounding_box() for s in self.get_fields()])
+
+    def to_x_grid(self):
+        return np.unique(np.array([s.to_x_grid() for s in self.get_fields()]), axis=0)[
+            0
+        ]
+
+    def to_y_grid(self):
+        return np.unique(np.array([s.to_y_grid() for s in self.get_fields()]), axis=0)[
+            0
+        ]
 
 
 def reader(source, path, magic=None, deeper_check=False):

@@ -11,6 +11,7 @@ import logging
 import os
 from importlib import import_module
 
+from emohawk import load_from
 from emohawk.core import Base
 from emohawk.decorators import locked
 
@@ -22,6 +23,7 @@ class Wrapper(Base):
 
 
 _HELPERS = {}
+_TRANSLATORS = {}
 
 
 # TODO: Add plugins
@@ -37,6 +39,10 @@ def _wrappers():
                 except Exception as e:
                     LOG.warning(f"Error loading wrapper '{name}': {e}")
     return _HELPERS
+
+
+def _translators():
+    return _wrappers("translator", _TRANSLATORS)
 
 
 def get_wrapper(data, *args, **kwargs):
@@ -55,3 +61,15 @@ def get_wrapper(data, *args, **kwargs):
     fullname = ".".join([data.__class__.__module__, data.__class__.__qualname__])
 
     raise ValueError(f"Cannot find a wrapper for class {fullname}")
+
+
+def get_translator(source, cls):
+    if not isinstance(source, Base):
+        source = load_from("file", source)
+
+    for name, h in _translators().items():
+        translator = h(source, cls)
+        if translator is not None:
+            return translator()
+
+    raise ValueError(f"Cannot find a translator for class {cls.__name__}")
