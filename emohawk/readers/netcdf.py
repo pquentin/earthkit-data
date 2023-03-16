@@ -369,7 +369,7 @@ class NetCDFReader(Reader):
         return arr
 
     def to_pandas(self):
-        return self.to_xarray().to_pandas()
+        return self.to_xarray().to_dataframe()
 
     def to_xarray(self, **kwargs):
         return type(self).to_xarray_multi_from_paths([self.path], **kwargs)
