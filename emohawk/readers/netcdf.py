@@ -310,7 +310,7 @@ class NetCDFReader(Reader):
                 use = False
 
                 if (
-                    standard_name.lower() in GEOGRAPHIC_COORDS["x"]
+                    str(standard_name).lower() in GEOGRAPHIC_COORDS["x"]
                     or (long_name == "longitude")
                     or (axis == "X")
                 ):
@@ -318,7 +318,7 @@ class NetCDFReader(Reader):
                     use = True
 
                 if (
-                    standard_name.lower() in GEOGRAPHIC_COORDS["y"]
+                    str(standard_name).lower() in GEOGRAPHIC_COORDS["y"]
                     or (long_name == "latitude")
                     or (axis == "Y")
                 ):
